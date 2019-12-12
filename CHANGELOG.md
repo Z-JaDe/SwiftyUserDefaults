@@ -1,5 +1,22 @@
 ### Next
 
+### 5.0.0-beta.5 (2019-10-05)
+
+* Removed Combine extensions for now. Due to problems with weak-linking the framework, it's too difficult to support it with ease using all package managers and also without breaking backwards-compatibility. Probably gonna introduce it once we only support Xcode 11. [@sunshinejr](https://github.com/sunshinejr)
+
+### 5.0.0-beta.4 (2019-09-27)
+
+* Fixed an issue with Xcode freezing, never-finishing indexing/building the project when we used `Defaults[\.keyPath]` in conditional statement. Unfortunately we had to add `key` label to `Defaults[key: DefaultsKey<String?>...]` where you wouldn't have to add the label to the subscript before. [@sunshinejr](https://github.com/sunshinejr)
+
+### 5.0.0-beta.3 (2019-09-25)
+
+* Fixed an issue with SPM integration - it no longer fetches testing libraries & doesn't create runtime crashes or Xcode Preview crashes anymore. [@sunshinejr](https://github.com/sunshinejr)
+* Fixed an issue where Carthage users using Xcode 11 couldn't install SwiftyUserDefaults 5. We added weak-linking for the xcodeproj so you might need additional steps for Xcode 10 + Carthage + SwiftyUserDefaults 5.* users. [@sunshinejr](https://github.com/sunshinejr)
+
+### 5.0.0-beta.2 (2019-09-09)
+
+* Added extensions for `Combine`! If you can `import Combine` and use it, check the `publisher(for:)` method on `DefaultsAdapter`. [@sunshinejr](https://github.com/sunshinejr)
+
 ### 5.0.0-beta.1 (2019-09-05)
 
 * Introduced `DefaultsAdapter` thats the main object for user defaults and the `Defaults` global variable. [@marty-suzuki](https://github.com/marty-suzuki)

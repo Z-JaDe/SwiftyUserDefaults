@@ -1,7 +1,7 @@
 # SwiftyUserDefaults
 
 ![Platforms](https://img.shields.io/badge/platforms-ios%20%7C%20osx%20%7C%20watchos%20%7C%20tvos-lightgrey.svg)
-[![CI Status](https://api.travis-ci.org/radex/SwiftyUserDefaults.svg?branch=master)](https://travis-ci.org/radex/SwiftyUserDefaults)
+[![CI Status](https://api.travis-ci.org/sunshinejr/SwiftyUserDefaults.svg?branch=master)](https://travis-ci.org/sunshinejr/SwiftyUserDefaults)
 [![CocoaPods compatible](https://img.shields.io/badge/CocoaPods-compatible-4BC51D.svg?style=flat)](#cocoapods)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](#carthage)
 [![SPM compatible](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](#swift-package-manager)
@@ -13,10 +13,10 @@
 #### Modern Swift API for `NSUserDefaults`
 ###### SwiftyUserDefaults makes user defaults enjoyable to use by combining expressive Swifty API with the benefits of static typing. Define your keys in one place, use value types easily, and get extra safety and convenient compile-time checks for free.
 
-Older Documentation: [Version 4.0.0](https://github.com/sunshinejr/SwiftyUserDefaults/blob/566ace16ee91242b61e2e9da6cdbe7dfdadd926c/README.md), [Version 3.0.1](https://github.com/radex/SwiftyUserDefaults/blob/14b629b035bf6355b46ece22c3851068a488a895/README.md)<br />
+Previous versions' documentation: [Version 4.0.0](https://github.com/sunshinejr/SwiftyUserDefaults/blob/566ace16ee91242b61e2e9da6cdbe7dfdadd926c/README.md), [Version 3.0.1](https://github.com/sunshinejr/SwiftyUserDefaults/blob/14b629b035bf6355b46ece22c3851068a488a895/README.md)<br />
 Migration guides: [from 4.x to 5.x](MigrationGuides/migration_4_to_5.md), [from 4.0.0-alpha.1 to 4.0.0-alpha.3](MigrationGuides/migration_4_alpha_1_to_4_alpha_2.md), [from 3.x to 4.x](MigrationGuides/migration_3_to_4.md)
 
-# Version 5.0.0-beta.1
+# Version 5.0.0-beta.5
 
 <p align="center">
     <a href="#features">Features</a> &bull;
@@ -28,10 +28,10 @@ Migration guides: [from 4.x to 5.x](MigrationGuides/migration_4_to_5.md), [from 
     <a href="#custom-types">Custom types</a>
 </p>
 <p align="center">
+    <a href="#property-wrappers">Property wrappers</a> &bull;
     <a href="#kvo">KVO</a> &bull;
-    <a href="#launch-arguments">Launch arguments</a> &bull;    
-    <a href="#property-wrappers">Property wrappers</a> &bull;    
     <a href="#keypath-dynamicMemberLookup">dynamicMemberLookup</a> &bull;
+    <a href="#launch-arguments">Launch arguments</a> &bull;
     <a href="#utils">Utils</a> &bull;
     <a href="#installation">Installation</a>
 </p>
@@ -92,8 +92,8 @@ Just create a `DefaultsKey` object, put the type of the value you want to store 
 You can now use the `Defaults` shortcut to access those values:
 
 ```swift
-Defaults[colorKey] = "red"
-Defaults[colorKey] // => "red", typed as String
+Defaults[key: colorKey] = "red"
+Defaults[key: colorKey] // => "red", typed as String
 ```
 
 The compiler won't let you set a wrong value type, and fetching conveniently returns `String`.
@@ -310,46 +310,7 @@ extension Data: DefaultsSerializable {
 }
 ```
 
-Also, take a look at our source code (or tests) to see more examples of bridges. If you find yourself confused with all these bridges, please [create an issue](https://github.com/radex/SwiftyUserDefaults/issues/new) and we will figure something out.
-
-## KVO
-
-KVO is supported for all the types that are `DefaultsSerializable`. However, if you have a custom type, it needs to have correctly defined bridges and serialization in them.
-
-To observe a value:
-```swift
-let nameKey = DefaultsKey<String>("name", defaultValue: "")
-Defaults.observe(key: nameKey) { update in
-	// here you can access `oldValue`/`newValue` and few other properties
-}
-```
-
-By default we are using `[.old, .new]` options for observing, but you can provide your own:
-```swift
-Defaults.observe(key: nameKey, options: [.initial, .old, .new]) { _ in }
-```
-
-## Launch arguments
-
-Do you like to customize your app/script/tests by UserDefaults? Now it's fully supported on our side, statically typed of course.
-
-_Note: for now we support only `Bool`, `Double`, `Int`, `String` values, but if you have any other requests for that feature, please open an issue or PR and we can talk about implementing it in new versions._
-
-### You can pass your arguments in your schema:
-<img src="https://i.imgur.com/SDpOBpK.png" alt="Pass launch arguments in Xcode Schema editor." />
-
-### Or you can use launch arguments in XCUIApplication:
-```swift
-func testExample() {
-    let app = XCUIApplication()
-    app.launchArguments = ["-skipLogin", "true", "-loginTries", "3", "-lastGameTime", "61.3", "-nickname", "sunshinejr"]
-    app.launch()
-}
-```
-### Or pass them as command line arguments!
-```bash
-./script -skipLogin true -loginTries 3 -lastGameTime 61.3 -nickname sunshinejr
-```
+Also, take a look at our source code (or tests) to see more examples of bridges. If you find yourself confused with all these bridges, please [create an issue](https://github.com/sunshinejr/SwiftyUserDefaults/issues/new) and we will figure something out.
 
 ## Property wrappers
 
@@ -380,6 +341,23 @@ struct Settings {
     @SwiftyUserDefault(keyPath: \.userLastLoginDate, options: [.cached, .observed])
     var userLastLoginDate: Date?
 }
+```
+
+## KVO
+
+KVO is supported for all the types that are `DefaultsSerializable`. However, if you have a custom type, it needs to have correctly defined bridges and serialization in them.
+
+To observe a value:
+```swift
+let nameKey = DefaultsKey<String>("name", defaultValue: "")
+Defaults.observe(key: nameKey) { update in
+	// here you can access `oldValue`/`newValue` and few other properties
+}
+```
+
+By default we are using `[.old, .new]` options for observing, but you can provide your own:
+```swift
+Defaults.observe(key: nameKey, options: [.initial, .old, .new]) { _ in }
 ```
 
 ## KeyPath dynamicMemberLookup
@@ -414,6 +392,28 @@ Defaults.color = NSColor.white
 Defaults.color?.whiteComponent // => 1.0
 ```
 
+## Launch arguments
+
+Do you like to customize your app/script/tests by UserDefaults? Now it's fully supported on our side, statically typed of course.
+
+_Note: for now we support only `Bool`, `Double`, `Int`, `String` values, but if you have any other requests for that feature, please open an issue or PR and we can talk about implementing it in new versions._
+
+### You can pass your arguments in your schema:
+<img src="https://i.imgur.com/SDpOBpK.png" alt="Pass launch arguments in Xcode Schema editor." />
+
+### Or you can use launch arguments in XCUIApplication:
+```swift
+func testExample() {
+    let app = XCUIApplication()
+    app.launchArguments = ["-skipLogin", "true", "-loginTries", "3", "-lastGameTime", "61.3", "-nickname", "sunshinejr"]
+    app.launch()
+}
+```
+### Or pass them as command line arguments!
+```bash
+./script -skipLogin true -loginTries 3 -lastGameTime 61.3 -nickname sunshinejr
+```
+
 ## Utils
 
 ### Remove all keys
@@ -429,7 +429,7 @@ Defaults.removeAll()
 If you're sharing your user defaults between different apps or an app and its extensions, you can use SwiftyUserDefaults by overriding the `Defaults` shortcut with your own. Just add in your app:
 
 ```swift
-var Defaults = UserDefaults(suiteName: "com.my.app")!
+var Defaults = DefaultsAdapter<DefaultsKeys>(defaults: UserDefaults(suiteName: "com.my.app")!, keyStore: .init())
 ```
 
 ### Check key
@@ -453,7 +453,7 @@ let hasKey = Defaults.hasKey(\.skipLogin)
 If you're using CocoaPods, just add this line to your Podfile:
 
 ```ruby
-pod 'SwiftyUserDefaults', '5.0.0-beta.1'
+pod 'SwiftyUserDefaults', '5.0.0-beta.5'
 ```
 
 Install by running this command in your terminal:
@@ -473,7 +473,7 @@ import SwiftyUserDefaults
 Just add to your Cartfile:
 
 ```ruby
-github "radex/SwiftyUserDefaults" == "5.0.0-beta.1"
+github "sunshinejr/SwiftyUserDefaults" "5.0.0-beta.5"
 ```
 
 ### Swift Package Manager
@@ -484,7 +484,7 @@ let package = Package(
     name: "MyPackage",
     products: [...],
     dependencies: [
-        .package(url: "https://github.com/radex/SwiftyUserDefaults.git", .exact("5.0.0-beta.1"),
+        .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", .exact("5.0.0-beta.5"),
     ],
     targets: [...]
 )
