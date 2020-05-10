@@ -16,7 +16,7 @@
 Previous versions' documentation: [Version 4.0.0](https://github.com/sunshinejr/SwiftyUserDefaults/blob/566ace16ee91242b61e2e9da6cdbe7dfdadd926c/README.md), [Version 3.0.1](https://github.com/sunshinejr/SwiftyUserDefaults/blob/14b629b035bf6355b46ece22c3851068a488a895/README.md)<br />
 Migration guides: [from 4.x to 5.x](MigrationGuides/migration_4_to_5.md), [from 4.0.0-alpha.1 to 4.0.0-alpha.3](MigrationGuides/migration_4_alpha_1_to_4_alpha_2.md), [from 3.x to 4.x](MigrationGuides/migration_3_to_4.md)
 
-# Version 5.0.0-beta.5
+# Version 5.0.0
 
 <p align="center">
     <a href="#features">Features</a> &bull;
@@ -44,8 +44,8 @@ Define your keys!
 
 ```swift
 extension DefaultsKeys {
-    var username: DefaultsKey<String?> { return .init("username") }
-    var launchCount: DefaultsKey<Int> { return .init("launchCount", defaultValue: 0) }
+    var username: DefaultsKey<String?> { .init("username") }
+    var launchCount: DefaultsKey<Int> { .init("launchCount", defaultValue: 0) }
 }
 ```
 
@@ -104,8 +104,8 @@ For extra convenience, define your keys by extending magic `DefaultsKeys` class 
 
 ```swift
 extension DefaultsKeys {
-    var username: DefaultsKey<String?> { return .init("username") }
-    var launchCount: DefaultsKey<Int> { return .init("launchCount", defaultValue: 0) }
+    var username: DefaultsKey<String?> { .init("username") }
+    var launchCount: DefaultsKey<Int> { .init("launchCount", defaultValue: 0) }
 }
 ```
 
@@ -213,7 +213,7 @@ For instance, this is a bridge for single value data storing/retrieving using `N
 public struct DefaultsKeyedArchiverBridge<T>: DefaultsBridge {
 
     public func get(key: String, userDefaults: UserDefaults) -> T? {
-        return userDefaults.data(forKey: key).flatMap(NSKeyedUnarchiver.unarchiveObject) as? T
+        userDefaults.data(forKey: key).flatMap(NSKeyedUnarchiver.unarchiveObject) as? T
     }
 
     public func save(key: String, value: T?, userDefaults: UserDefaults) {
@@ -235,11 +235,11 @@ public struct DefaultsArrayBridge<T: Collection>: DefaultsBridge {
     }
 
     public func get(key: String, userDefaults: UserDefaults) -> T? {
-        return userDefaults.array(forKey: key) as? T
+        userDefaults.array(forKey: key) as? T
     }
 
     public func deserialize(_ object: Any) -> T? {
-        return nil
+        nil
     }
 }
 ```
@@ -248,8 +248,8 @@ Now, to use these bridges in our type we simply declare it as follows:
 ```swift
 struct FrogCustomSerializable: DefaultsSerializable {
 
-    static var _defaults: DefaultsBridge<FrogCustomSerializable> { return DefaultsKeyedArchiverBridge() }
-    static var _defaultsArray: DefaultsBridge<[FrogCustomSerializable]> { return DefaultsKeyedArchiverBridge() }
+    static var _defaults: DefaultsBridge<FrogCustomSerializable> { DefaultsKeyedArchiverBridge() }
+    static var _defaultsArray: DefaultsBridge<[FrogCustomSerializable]> { DefaultsKeyedArchiverBridge() }
 
     let name: String
 }
@@ -276,7 +276,7 @@ final class DefaultsFrogBridge: DefaultsBridge {
 
 final class DefaultsFrogArrayBridge: DefaultsBridge {
     func get(key: String, userDefaults: UserDefaults) -> [FrogCustomSerializable]? {
-        return userDefaults.array(forKey: key)?
+        userDefaults.array(forKey: key)?
             .compactMap { $0 as? String }
             .map(FrogCustomSerializable.init)
     }
@@ -295,8 +295,8 @@ final class DefaultsFrogArrayBridge: DefaultsBridge {
 
 struct FrogCustomSerializable: DefaultsSerializable, Equatable {
 
-    static var _defaults: DefaultsFrogBridge { return DefaultsFrogBridge() }
-    static var _defaultsArray: DefaultsFrogArrayBridge { return DefaultsFrogArrayBridge() }
+    static var _defaults: DefaultsFrogBridge { DefaultsFrogBridge() }
+    static var _defaultsArray: DefaultsFrogArrayBridge { DefaultsFrogArrayBridge() }
 
     let name: String
 }
@@ -305,8 +305,8 @@ struct FrogCustomSerializable: DefaultsSerializable, Equatable {
 To support existing types with different bridges, you can extend it similarly:
 ```swift
 extension Data: DefaultsSerializable {
-    public static var _defaultsArray: DefaultsArrayBridge<[T]> { return DefaultsArrayBridge() }
-    public static var _defaults: DefaultsDataBridge { return DefaultsDataBridge() }
+    public static var _defaultsArray: DefaultsArrayBridge<[T]> { DefaultsArrayBridge() }
+    public static var _defaults: DefaultsDataBridge { DefaultsDataBridge() }
 }
 ```
 
@@ -347,13 +347,21 @@ struct Settings {
 
 KVO is supported for all the types that are `DefaultsSerializable`. However, if you have a custom type, it needs to have correctly defined bridges and serialization in them.
 
-To observe a value:
+To observe a value for local DefaultsKey:
 ```swift
 let nameKey = DefaultsKey<String>("name", defaultValue: "")
 Defaults.observe(key: nameKey) { update in
 	// here you can access `oldValue`/`newValue` and few other properties
 }
 ```
+
+To observe a value for a key defined in DefaultsKeys extension:
+```swift
+Defaults.observe(\.nameKey) { update in
+	// here you can access `oldValue`/`newValue` and few other properties
+}
+```
+
 
 By default we are using `[.old, .new]` options for observing, but you can provide your own:
 ```swift
@@ -366,8 +374,8 @@ SwiftyUserDefaults makes KeyPath dynamicMemberLookup usable in Swift 5.1!
 
 ```swift
 extension DefaultsKeys {
-    var username: DefaultsKey<String?> { return .init("username") }
-    var launchCount: DefaultsKey<Int> { return .init("launchCount", defaultValue: 0) }
+    var username: DefaultsKey<String?> { .init("username") }
+    var launchCount: DefaultsKey<Int> { .init("launchCount", defaultValue: 0) }
 }
 ```
 
@@ -453,7 +461,7 @@ let hasKey = Defaults.hasKey(\.skipLogin)
 If you're using CocoaPods, just add this line to your Podfile:
 
 ```ruby
-pod 'SwiftyUserDefaults', '5.0.0-beta.5'
+pod 'SwiftyUserDefaults', '~> 5.0'
 ```
 
 Install by running this command in your terminal:
@@ -473,7 +481,7 @@ import SwiftyUserDefaults
 Just add to your Cartfile:
 
 ```ruby
-github "sunshinejr/SwiftyUserDefaults" "5.0.0-beta.5"
+github "sunshinejr/SwiftyUserDefaults" ~> 5.0
 ```
 
 ### Swift Package Manager
@@ -484,7 +492,7 @@ let package = Package(
     name: "MyPackage",
     products: [...],
     dependencies: [
-        .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", .exact("5.0.0-beta.5"),
+        .package(url: "https://github.com/sunshinejr/SwiftyUserDefaults.git", .upToNextMajor(from: "5.0.0"))
     ],
     targets: [...]
 )
